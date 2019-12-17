@@ -40,7 +40,35 @@ public class GameManager : MonoBehaviour
     }
 
     public void calculateGameSummary() {
-        Debug.Log("duh");
+        Debug.Log(statLine.text);
+        zeroOutGameSummary();
+        char [] statLineArray = statLine.text.ToCharArray();
+        for (int i = 0; i < statLineArray.Length; i++) {
+            if (statLineArray[i] == '-'){
+                char char1 = statLineArray[i];
+                i++;
+                char char2 = statLineArray[i];
+                processStat($"{char1}{char2}");
+            } else {
+                processStat($"{statLineArray[i]}");
+            }
+        }
+    }
+
+    public void zeroOutGameSummary() {
+        points.text = "0";
+        rebounds.text = "0";
+        assists.text = "0";
+        turnovers.text = "0";
+        blocks.text = "0";
+        steals.text = "0";
+        fouls.text = "0";
+        threePointersAttempted = 0;
+        threePointersMade = 0;
+        twoPointersAttempted = 0;
+        twoPointersMade = 0;
+        freeThrowsAttempted = 0;
+        freeThrowsMade = 0;
     }
 
     public void updateShootingPercentage(int pointVal) {
@@ -79,8 +107,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void updateStatlineText( string val ) {
-        statLine.text = statLine.text + val;
+    public void processStat( string val ){
         if (val == "1" || val == "2" || val == "3") {
             int num = Int32.Parse(points.text);
             num += Int32.Parse(val);
@@ -120,5 +147,9 @@ public class GameManager : MonoBehaviour
             num += 1;
             fouls.text = $"{num}";
         }
+    }
+
+    public void updateStatlineText( string val ) {
+        statLine.text = statLine.text + val;
     }
 }
