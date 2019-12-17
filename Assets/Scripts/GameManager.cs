@@ -39,6 +39,10 @@ public class GameManager : MonoBehaviour
         
     }
 
+    public void calculateGameSummary() {
+        Debug.Log("duh");
+    }
+
     public void updateShootingPercentage(int pointVal) {
         if ( pointVal == 1 ) {
             freeThrowsAttempted += 1;
