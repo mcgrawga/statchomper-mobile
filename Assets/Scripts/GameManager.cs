@@ -5,6 +5,12 @@ using UnityEngine.UI;
 using System;
 public class GameManager : MonoBehaviour
 {
+
+
+
+    public Canvas gameSummary;
+    public Canvas gameDetail;
+    public GameObject gameDetailErrorPanel;
     public InputField statLine;
     public InputField player;
     public InputField date;
@@ -25,12 +31,21 @@ public class GameManager : MonoBehaviour
     private int twoPointersMade;
     private int freeThrowsAttempted;
     private int freeThrowsMade;
+    private string gameID;
+    public Button buttonPrefab;
+    public GameObject StackedGames;
 
     // Start is called before the first frame update
     void Start()
     {
-        DateTime today = DateTime.Today;
-        date.text = today.ToString("yyyy-MM-dd");
+        showGamesSummary();
+    }
+
+    private string getGameSummaryText(string gameID) {
+        string p = PlayerPrefs.GetString($"{gameID}_player");
+        string d = PlayerPrefs.GetString($"{gameID}_date");
+        string o = PlayerPrefs.GetString($"{gameID}_opponent");
+        return $" {p} vs {o}\n {d}";
     }
 
     // Update is called once per frame
@@ -40,15 +55,16 @@ public class GameManager : MonoBehaviour
     }
 
     public void calculateGameSummary() {
-        Debug.Log(statLine.text);
         zeroOutGameSummary();
         char [] statLineArray = statLine.text.ToCharArray();
         for (int i = 0; i < statLineArray.Length; i++) {
-            if (statLineArray[i] == '-'){
-                char char1 = statLineArray[i];
-                i++;
-                char char2 = statLineArray[i];
-                processStat($"{char1}{char2}");
+            if (statLineArray[i] == '-') {
+                if ( (i+1) < statLineArray.Length) {
+                    char char1 = statLineArray[i];
+                    i++;
+                    char char2 = statLineArray[i];
+                    processStat($"{char1}{char2}");
+                }
             } else {
                 processStat($"{statLineArray[i]}");
             }
@@ -151,5 +167,120 @@ public class GameManager : MonoBehaviour
 
     public void updateStatlineText( string val ) {
         statLine.text = statLine.text + val;
+    }
+
+    private string [] getGameIDs(){
+        string gamesString = PlayerPrefs.GetString("games");
+        if (gamesString.Length < 1) {
+            return new string[0];
+        } else {
+            return gamesString.Split(' ');
+        }
+    }
+
+    private string getNewGameID(){
+        string [] gameIDs = getGameIDs();
+        if (gameIDs.Length < 1) {
+            return "1";
+        } else {
+            string lastGameIDStr = gameIDs[gameIDs.Length - 1];
+            int lastGameIDInt = Int32.Parse(lastGameIDStr);
+            lastGameIDInt++;
+            return $"{lastGameIDInt}";
+        }
+    }
+
+    private bool validGameInfo() {
+        if (player.text.Length < 1){
+            return false;
+        }
+        if (date.text.Length < 1){
+            return false;
+        }
+        if (opponent.text.Length < 1){
+            return false;
+        }
+        return true;
+    }
+
+    private void showError(string e) {
+        gameDetailErrorPanel.SetActive(true);
+        gameDetailErrorPanel.GetComponentInChildren<Text>().text = e;
+    }
+
+    public void dismissError() {
+        gameDetailErrorPanel.SetActive(false);
+    }
+
+    public void saveGame() {
+        if (validGameInfo()){
+            // IF THIS IS A NEW GAME, GENERATE AN ID FOR STORAGE ADD TO GAMES LIST
+            if (gameID == null) {
+                gameID = getNewGameID();
+                string gamesString = PlayerPrefs.GetString("games");
+                if (gamesString.Length < 1){
+                    PlayerPrefs.SetString("games", $"{gameID}");    
+                } else {
+                    PlayerPrefs.SetString("games", $"{gamesString} {gameID}");
+                }
+            }
+            PlayerPrefs.SetString($"{gameID}_statLine", statLine.text);
+            PlayerPrefs.SetString($"{gameID}_player", player.text);
+            PlayerPrefs.SetString($"{gameID}_date", date.text);
+            PlayerPrefs.SetString($"{gameID}_opponent", opponent.text);
+            gameID = null;
+            showGamesSummary();
+        } else {
+            showError("You need a player, date and opponent to save a game.");
+        }
+    }
+
+    public void loadGame(string id) {
+        showBlankGameDetail();
+        gameID = id;
+        statLine.text = PlayerPrefs.GetString($"{gameID}_statLine");
+        player.text = PlayerPrefs.GetString($"{gameID}_player");
+        date.text = PlayerPrefs.GetString($"{gameID}_date");
+        opponent.text = PlayerPrefs.GetString($"{gameID}_opponent");
+    }
+
+    public void showGamesSummary() {
+        foreach (Transform child in StackedGames.transform)
+        {
+            Destroy(child.gameObject);
+        }
+        string [] gameIDs = getGameIDs();
+        for (int i = 0; i < gameIDs.Length; i++){
+            Button b = Instantiate(buttonPrefab);
+            b.GetComponentInChildren<Text>().text = getGameSummaryText(gameIDs[i]);
+            b.transform.SetParent(StackedGames.transform);
+            string id = gameIDs[i];
+            b.onClick.AddListener( () => loadGame(id) );
+        }
+        for (int i = 0; i < gameIDs.Length; i++){
+            Button b = Instantiate(buttonPrefab);
+            b.GetComponentInChildren<Text>().text = getGameSummaryText(gameIDs[i]);
+            b.transform.SetParent(StackedGames.transform);
+            string id = gameIDs[i];
+            b.onClick.AddListener( () => loadGame(id) );
+        }
+        for (int i = 0; i < gameIDs.Length; i++){
+            Button b = Instantiate(buttonPrefab);
+            b.GetComponentInChildren<Text>().text = getGameSummaryText(gameIDs[i]);
+            b.transform.SetParent(StackedGames.transform);
+            string id = gameIDs[i];
+            b.onClick.AddListener( () => loadGame(id) );
+        }
+        gameDetail.gameObject.SetActive(false);
+        gameSummary.gameObject.SetActive(true);
+    }
+    public void showBlankGameDetail() {
+        statLine.text = "";
+        player.text = "";
+        opponent.text = "";
+        DateTime today = DateTime.Today;
+        date.text = today.ToString("yyyy-MM-dd");
+        gameDetail.gameObject.SetActive(true);
+        gameSummary.gameObject.SetActive(false);
     }
 }
