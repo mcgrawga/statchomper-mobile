@@ -235,6 +235,10 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void cancelNewGame () {
+        showGamesSummary();
+    }
+
     public void loadGame(string id) {
         showBlankGameDetail();
         gameID = id;
@@ -250,20 +254,7 @@ public class GameManager : MonoBehaviour
             Destroy(child.gameObject);
         }
         string [] gameIDs = getGameIDs();
-        for (int i = 0; i < gameIDs.Length; i++){
-            Button b = Instantiate(buttonPrefab);
-            b.GetComponentInChildren<Text>().text = getGameSummaryText(gameIDs[i]);
-            b.transform.SetParent(StackedGames.transform);
-            string id = gameIDs[i];
-            b.onClick.AddListener( () => loadGame(id) );
-        }
-        for (int i = 0; i < gameIDs.Length; i++){
-            Button b = Instantiate(buttonPrefab);
-            b.GetComponentInChildren<Text>().text = getGameSummaryText(gameIDs[i]);
-            b.transform.SetParent(StackedGames.transform);
-            string id = gameIDs[i];
-            b.onClick.AddListener( () => loadGame(id) );
-        }
+        Array.Reverse(gameIDs);
         for (int i = 0; i < gameIDs.Length; i++){
             Button b = Instantiate(buttonPrefab);
             b.GetComponentInChildren<Text>().text = getGameSummaryText(gameIDs[i]);
