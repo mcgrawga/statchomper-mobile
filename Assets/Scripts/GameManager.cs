@@ -6,11 +6,10 @@ using System;
 public class GameManager : MonoBehaviour
 {
 
-
-
-    public Canvas gameSummary;
-    public Canvas gameDetail;
-    public GameObject gameDetailErrorPanel;
+    private string statSaveURL = "https://statchomper.herokuapp.com/sms-basketball";
+    public GameObject gameSummaryPanel;
+    public GameObject gameDetailPanel;
+    public GameObject errorPanel;
     public InputField statLine;
     public InputField player;
     public InputField date;
@@ -204,12 +203,12 @@ public class GameManager : MonoBehaviour
     }
 
     private void showError(string e) {
-        gameDetailErrorPanel.SetActive(true);
-        gameDetailErrorPanel.GetComponentInChildren<Text>().text = e;
+        errorPanel.SetActive(true);
+        errorPanel.GetComponentInChildren<Text>().text = e;
     }
 
     public void dismissError() {
-        gameDetailErrorPanel.SetActive(false);
+        errorPanel.SetActive(false);
     }
 
     public void saveGame() {
@@ -262,8 +261,8 @@ public class GameManager : MonoBehaviour
             string id = gameIDs[i];
             b.onClick.AddListener( () => loadGame(id) );
         }
-        gameDetail.gameObject.SetActive(false);
-        gameSummary.gameObject.SetActive(true);
+        gameDetailPanel.SetActive(false);
+        gameSummaryPanel.SetActive(true);
     }
     public void showBlankGameDetail() {
         statLine.text = "";
@@ -271,7 +270,7 @@ public class GameManager : MonoBehaviour
         opponent.text = "";
         DateTime today = DateTime.Today;
         date.text = today.ToString("yyyy-MM-dd");
-        gameDetail.gameObject.SetActive(true);
-        gameSummary.gameObject.SetActive(false);
+        gameDetailPanel.SetActive(true);
+        gameSummaryPanel.SetActive(false);
     }
 }
