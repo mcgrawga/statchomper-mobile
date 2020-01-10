@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System;
+using System.Net.Http;
 public class GameManager : MonoBehaviour
 {
 
     private string statSaveURL = "https://statchomper.herokuapp.com/sms-basketball";
+    private static readonly HttpClient client = new HttpClient();
     public GameObject gameSummaryPanel;
     public GameObject gameDetailPanel;
     public GameObject errorPanel;
@@ -37,6 +39,7 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Screen.orientation = ScreenOrientation.Portrait;
         showGamesSummary();
     }
 
@@ -211,6 +214,15 @@ public class GameManager : MonoBehaviour
         errorPanel.SetActive(false);
     }
 
+    public async void submitGame(string statline, string player, string date, string opponent) {
+        var body = new Dictionary<string, string>
+        {
+            { "Body", $"{date}:{player}:{opponent}:{statline}" }
+        };
+        var bodyEncoded = new FormUrlEncodedContent(body);
+        var result = await client.PostAsync(this.statSaveURL, bodyEncoded);
+    }
+
     public void saveGame() {
         if (validGameInfo()){
             // IF THIS IS A NEW GAME, GENERATE AN ID FOR STORAGE ADD TO GAMES LIST
@@ -220,7 +232,7 @@ public class GameManager : MonoBehaviour
                 if (gamesString.Length < 1){
                     PlayerPrefs.SetString("games", $"{gameID}");    
                 } else {
-                    PlayerPrefs.SetString("games", $"{gamesString} {gameID}");
+                    PlayerPrefs.SetString("games", $"{gamesString} {gameID}".Trim());
                 }
             }
             PlayerPrefs.SetString($"{gameID}_statLine", statLine.text);
@@ -228,6 +240,9 @@ public class GameManager : MonoBehaviour
             PlayerPrefs.SetString($"{gameID}_date", date.text);
             PlayerPrefs.SetString($"{gameID}_opponent", opponent.text);
             gameID = null;
+            if ( statLine.text.ToUpper().Contains("H")) {
+                submitGame(statLine.text, player.text, date.text, opponent.text);
+            }
             showGamesSummary();
         } else {
             showError("You need a player, date and opponent to save a game.");
@@ -235,6 +250,7 @@ public class GameManager : MonoBehaviour
     }
 
     public void cancelNewGame () {
+        gameID = null;
         showGamesSummary();
     }
 
@@ -245,6 +261,23 @@ public class GameManager : MonoBehaviour
         player.text = PlayerPrefs.GetString($"{gameID}_player");
         date.text = PlayerPrefs.GetString($"{gameID}_date");
         opponent.text = PlayerPrefs.GetString($"{gameID}_opponent");
+    }
+
+    public void deleteGame() {
+        PlayerPrefs.DeleteKey($"{gameID}_statLine");
+        PlayerPrefs.DeleteKey($"{gameID}_player");
+        PlayerPrefs.DeleteKey($"{gameID}_date");
+        PlayerPrefs.DeleteKey($"{gameID}_opponent");
+        string [] gameIDs = getGameIDs();
+        string gameString = "";
+        for (int i = 0; i < gameIDs.Length; i++) {
+            if (gameIDs[i] != gameID) {
+                gameString = $"{gameString} {gameIDs[i]}";
+            }
+        }
+        PlayerPrefs.SetString("games", gameString.Trim());
+        gameID = null;
+        showGamesSummary();
     }
 
     public void showGamesSummary() {
