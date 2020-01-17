@@ -12,6 +12,7 @@ public class GameManager : MonoBehaviour
     public GameObject gameSummaryPanel;
     public GameObject gameDetailPanel;
     public GameObject errorPanel;
+    public GameObject confirmDeletePanel;
     public InputField statLine;
     public InputField player;
     public InputField date;
@@ -40,6 +41,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         Screen.orientation = ScreenOrientation.Portrait;
+        TouchScreenKeyboard.hideInput = true;
         showGamesSummary();
     }
 
@@ -263,6 +265,13 @@ public class GameManager : MonoBehaviour
         opponent.text = PlayerPrefs.GetString($"{gameID}_opponent");
     }
 
+    public void confirmDeleteGame() {
+        confirmDeletePanel.SetActive(true);
+    }
+
+    public void cancelDeleteGame() {
+        confirmDeletePanel.SetActive(false);
+    }
     public void deleteGame() {
         PlayerPrefs.DeleteKey($"{gameID}_statLine");
         PlayerPrefs.DeleteKey($"{gameID}_player");
@@ -277,6 +286,7 @@ public class GameManager : MonoBehaviour
         }
         PlayerPrefs.SetString("games", gameString.Trim());
         gameID = null;
+        confirmDeletePanel.SetActive(false);
         showGamesSummary();
     }
 
