@@ -89,6 +89,9 @@ public class GameManager : MonoBehaviour
         twoPointersMade = 0;
         freeThrowsAttempted = 0;
         freeThrowsMade = 0;
+        threepointers.text = "0 for 0 (0%)";
+        twopointers.text = "0 for 0 (0%)";
+        freethrows.text = "0 for 0 (0%)";
     }
 
     public void updateShootingPercentage(int pointVal) {
